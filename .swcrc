@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "ES2020",
+    "externalHelpers": false,
+    "keepClassNames": true
+  },
+  "module": {
+    "type": "commonjs",
+    "noInterop": false
+  },
+  "sourceMaps": true,
+  "inlineSourcesContent": true
+}
