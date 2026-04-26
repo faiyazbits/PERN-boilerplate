@@ -1,18 +1,14 @@
-import nodemailer from "nodemailer";
-import config from "../config/config";
-import logger from "../config/logger";
+import nodemailer from 'nodemailer';
+import config from '../config/config';
+import logger from '../config/logger';
 
 const transport = nodemailer.createTransport(config.email.smtp);
 
-if (config.env === "production") {
+if (config.env === 'production') {
   transport
     .verify()
-    .then(() => logger.info("Connected to email server"))
-    .catch(() =>
-      logger.warn(
-        "Unable to connect to email server. Make sure you have configured the SMTP options in .env",
-      ),
-    );
+    .then(() => logger.info('Connected to email server'))
+    .catch(() => logger.warn('Unable to connect to email server. Make sure you have configured the SMTP options in .env'));
 }
 
 const sendEmail = async (to: string, subject: string, text: string) => {
@@ -21,7 +17,7 @@ const sendEmail = async (to: string, subject: string, text: string) => {
 };
 
 const sendResetPasswordEmail = async (to: string, token: string) => {
-  const subject = "Reset password";
+  const subject = 'Reset password';
   const resetPasswordUrl = `http://link-to-app/reset-password?token=${token}`;
   const text = `Dear user,
 To reset your password, click on this link: ${resetPasswordUrl}
@@ -30,7 +26,7 @@ If you did not request any password resets, then ignore this email.`;
 };
 
 const sendVerificationEmail = async (to: string, token: string) => {
-  const subject = "Email Verification";
+  const subject = 'Email Verification';
   const verificationEmailUrl = `http://link-to-app/verify-email?token=${token}`;
   const text = `Dear user,
 To verify your email, click on this link: ${verificationEmailUrl}

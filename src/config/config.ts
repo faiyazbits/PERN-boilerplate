@@ -17,8 +17,8 @@ interface IEmail {
     host?: string;
     port?: number;
     auth: {
-      user?: string;
-      pass?: string;
+      user?: string | undefined;
+      pass?: string | undefined;
     };
   };
   from?: string;
@@ -26,11 +26,7 @@ interface IEmail {
 
 interface IMongoose {
   url: string;
-  options: {
-    useCreateIndex: boolean;
-    useNewUrlParser: boolean;
-    useUnifiedTopology: boolean;
-  };
+  options: Record<string, never>;
 }
 
 interface Config {
@@ -69,7 +65,7 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
-const config: Config = {
+const _config: Config = {
   env: envVars.NODE_ENV as string,
   port: envVars.PORT as number,
   mongoose: {
@@ -96,6 +92,4 @@ const config: Config = {
   },
 };
 
-export type { Config, IEmail, IJwt, IMongoose };
-
-module.exports = config;
+export default _config;

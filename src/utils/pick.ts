@@ -1,7 +1,7 @@
 const pick = <T, K extends keyof T>(object: T, keys: K[]): Pick<T, K> => {
   return keys.reduce(
     (obj, key) => {
-      if (object && Object.hasOwn(object, key)) {
+      if (object && key in object) {
         obj[key] = object[key];
       }
       return obj;

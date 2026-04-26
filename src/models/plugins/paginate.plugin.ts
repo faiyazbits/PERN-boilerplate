@@ -15,8 +15,16 @@ export interface PaginateOptions {
   page?: number;
 }
 
+interface PopulateObj {
+  path: string;
+  populate?: PopulateObj;
+}
+
 const paginate = (schema: Schema) => {
-  schema.statics.paginate = async function (filter: any, options: PaginateOptions): Promise<QueryResult> {
+  schema.statics.paginate = async function (
+    filter: Record<string, unknown>,
+    options: PaginateOptions
+  ): Promise<QueryResult> {
     let sort = '';
     if (options.sortBy) {
       const sortingCriteria: string[] = [];
@@ -38,12 +46,9 @@ const paginate = (schema: Schema) => {
 
     if (options.populate) {
       options.populate.split(',').forEach((populateOption) => {
-        docsPromise = docsPromise.populate(
-          populateOption
-            .split('.')
-            .reverse()
-            .reduce((a: any, b: string) => ({ path: b, populate: a }))
-        );
+        const parts = populateOption.split('.').reverse();
+        const populateObj = parts.reduce<PopulateObj>((a, b) => ({ path: b, populate: a }), {} as PopulateObj);
+        docsPromise = docsPromise.populate(populateObj);
       });
     }
 

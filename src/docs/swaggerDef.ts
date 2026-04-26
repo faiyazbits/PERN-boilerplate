@@ -1,6 +1,6 @@
-const path = require('node:path');
-const { version } = require(path.resolve(__dirname, '../../package.json'));
-const config = require('../config/config');
+import config from '../config/config';
+
+const { version } = require('../../package.json');
 
 const swaggerDef = {
   openapi: '3.0.0',
@@ -19,4 +19,4 @@ const swaggerDef = {
   ],
 };
 
-module.exports = swaggerDef;
+export default swaggerDef;

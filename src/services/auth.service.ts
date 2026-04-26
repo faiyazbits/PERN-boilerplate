@@ -14,11 +14,15 @@ const loginUserWithEmailAndPassword = async (email: string, password: string) =>
 };
 
 const logout = async (refreshToken: string) => {
-  const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
+  const refreshTokenDoc = await Token.findOne({
+    token: refreshToken,
+    type: tokenTypes.REFRESH,
+    blacklisted: false,
+  });
   if (!refreshTokenDoc) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
   }
-  await refreshTokenDoc.remove();
+  await refreshTokenDoc.deleteOne();
 };
 
 const refreshAuth = async (refreshToken: string) => {
@@ -28,7 +32,7 @@ const refreshAuth = async (refreshToken: string) => {
     if (!user) {
       throw new Error();
     }
-    await refreshTokenDoc.remove();
+    await refreshTokenDoc.deleteOne();
     return tokenService.generateAuthTokens(user);
   } catch (_error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
@@ -57,7 +61,7 @@ const verifyEmail = async (verifyEmailToken: string) => {
       throw new Error();
     }
     await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-    await userService.updateUserById(user.id, { isEmailVerified: true });
+    await userService.updateUserById(user.id, { isEmailVerified: true } as any);
   } catch (_error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
   }

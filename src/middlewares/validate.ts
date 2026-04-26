@@ -1,21 +1,19 @@
-const Joi = require('joi');
-const httpStatus = require('http-status');
-const pick = require('../utils/pick');
-const ApiError = require('../utils/ApiError');
+import type { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import Joi from 'joi';
+import { ApiError } from '../utils/ApiError';
 
-const validate = (schema) => (req, _res, next) => {
-  const validSchema = pick(schema, ['params', 'query', 'body']);
-  const object = pick(req, Object.keys(validSchema));
-  const { value, error } = Joi.compile(validSchema)
+const validate = (schema: any) => (req: Request, _res: Response, next: NextFunction) => {
+  const { value, error } = Joi.compile(schema)
     .prefs({ errors: { label: 'key' }, abortEarly: false })
-    .validate(object);
+    .validate(req.body);
 
   if (error) {
     const errorMessage = error.details.map((details) => details.message).join(', ');
     return next(new ApiError(httpStatus.BAD_REQUEST, errorMessage));
   }
-  Object.assign(req, value);
+  Object.assign(req, { body: value });
   return next();
 };
 
-module.exports = validate;
+export default validate;

@@ -10,11 +10,6 @@ interface CreateUserBody {
   role?: string;
 }
 
-interface Filter {
-  name?: string;
-  role?: string;
-}
-
 const createUser = async (userBody: CreateUserBody): Promise<IUser> => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
@@ -22,7 +17,7 @@ const createUser = async (userBody: CreateUserBody): Promise<IUser> => {
   return User.create(userBody);
 };
 
-const queryUsers = async (filter: Filter, options: PaginateOptions): Promise<QueryResult> => {
+const queryUsers = async (filter: Record<string, unknown>, options: PaginateOptions): Promise<QueryResult> => {
   const users = await User.paginate(filter, options);
   return users;
 };
@@ -53,7 +48,7 @@ const deleteUserById = async (userId: string): Promise<IUser> => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  await user.remove();
+  await user.deleteOne();
   return user;
 };
 

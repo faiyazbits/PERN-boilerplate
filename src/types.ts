@@ -1,8 +1,8 @@
 import type { Request } from 'express';
-import type { IUser } from '../models';
+import type { IUser } from './models';
 
 export interface AuthRequest extends Request {
-  user?: IUser;
+  user?: IUser | Express.User;
 }
 
 export interface PaginateQuery extends Request {

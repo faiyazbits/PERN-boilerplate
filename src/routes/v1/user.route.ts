@@ -1,10 +1,10 @@
-const express = require('express');
-const auth = require('../../middlewares/auth');
-const validate = require('../../middlewares/validate');
-const userValidation = require('../../validations/user.validation');
-const userController = require('../../controllers/user.controller');
+import { Router } from 'express';
+import userController from '../../controllers/user.controller';
+import auth from '../../middlewares/auth';
+import validate from '../../middlewares/validate';
+import userValidation from '../../validations/user.validation';
 
-const router = express.Router();
+const router = Router();
 
 router
   .route('/')
@@ -17,7 +17,7 @@ router
   .patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
   .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
 
-module.exports = router;
+export default router;
 
 /**
  * @swagger
@@ -114,7 +114,7 @@ module.exports = router;
  *         schema:
  *           type: integer
  *           minimum: 1
- *           default: 1
+ *         default: 1
  *         description: Page number
  *     responses:
  *       "200":

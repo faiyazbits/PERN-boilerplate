@@ -1,10 +1,16 @@
-const mongoose = require('mongoose');
-const httpStatus = require('http-status');
-const config = require('../config/config');
-const logger = require('../config/logger');
-const ApiError = require('../utils/ApiError');
+import type { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import mongoose from 'mongoose';
+import config from '../config/config';
+import logger from '../config/logger';
+import { ApiError } from '../utils/ApiError';
 
-const errorConverter = (err, _req, _res, next) => {
+interface ErrorWithStatus extends Error {
+  statusCode?: number;
+  isOperational?: boolean;
+}
+
+const errorConverter = (err: ErrorWithStatus, _req: Request, _res: Response, next: NextFunction) => {
   let error = err;
   if (!(error instanceof ApiError)) {
     const statusCode =
@@ -15,8 +21,7 @@ const errorConverter = (err, _req, _res, next) => {
   next(error);
 };
 
-// eslint-disable-next-line no-unused-vars
-const errorHandler = (err, _req, res, _next) => {
+const errorHandler = (err: ErrorWithStatus, _req: Request, res: Response, _next: NextFunction) => {
   let { statusCode, message } = err;
   if (config.env === 'production' && !err.isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;
@@ -35,10 +40,7 @@ const errorHandler = (err, _req, res, _next) => {
     logger.error(err);
   }
 
-  res.status(statusCode).send(response);
+  res.status(statusCode ?? 500).send(response);
 };
 
-module.exports = {
-  errorConverter,
-  errorHandler,
-};
+export { errorConverter, errorHandler };

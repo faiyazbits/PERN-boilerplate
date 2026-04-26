@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import mongoose, { type Document, type Model } from 'mongoose';
 import validator from 'validator';
 import { roles } from '../config/roles';
-import { paginate, toJSON } from './plugins';
+import { type PaginateOptions, paginate, type QueryResult, toJSON } from './plugins';
 
 export interface IUser extends Document {
   name: string;
@@ -15,6 +15,7 @@ export interface IUser extends Document {
 
 interface IUserModel extends Model<IUser> {
   isEmailTaken: (email: string, excludeUserId?: mongoose.Types.ObjectId) => Promise<boolean>;
+  paginate: (filter: Record<string, unknown>, options: PaginateOptions) => Promise<QueryResult>;
 }
 
 const userSchema = new mongoose.Schema(

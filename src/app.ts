@@ -1,24 +1,24 @@
-const express = require('express');
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const mongoSanitize = require('express-mongo-sanitize');
-const compression = require('compression');
-const cors = require('cors');
-const passport = require('passport');
-const httpStatus = require('http-status');
-const config = require('./config/config');
-const morgan = require('./config/morgan');
-const { jwtStrategy } = require('./config/passport');
-const { authLimiter } = require('./middlewares/rateLimiter');
-const routes = require('./routes/v1');
-const { errorConverter, errorHandler } = require('./middlewares/error');
-const ApiError = require('./utils/ApiError');
+import compression from 'compression';
+import cors from 'cors';
+import express, { type Application, type NextFunction, type Request, type Response } from 'express';
+import mongoSanitize from 'express-mongo-sanitize';
+import helmet from 'helmet';
+import httpStatus from 'http-status';
+import passport from 'passport';
+import xss from 'xss-clean';
+import config from './config/config';
+import { errorHandler as morganErrorHandler, successHandler as morganSuccessHandler } from './config/morgan';
+import { jwtStrategy } from './config/passport';
+import { errorConverter, errorHandler } from './middlewares/error';
+import { authLimiter } from './middlewares/rateLimiter';
+import routes from './routes/v1';
+import { ApiError } from './utils/ApiError';
 
-const app = express();
+const app: Application = express();
 
 if (config.env !== 'test') {
-  app.use(morgan.successHandler);
-  app.use(morgan.errorHandler);
+  app.use(morganSuccessHandler);
+  app.use(morganErrorHandler);
 }
 
 // set security HTTP headers
@@ -54,7 +54,7 @@ if (config.env === 'production') {
 app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
-app.use((_req, _res, next) => {
+app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
 
@@ -64,4 +64,4 @@ app.use(errorConverter);
 // handle error
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

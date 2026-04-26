@@ -42,7 +42,7 @@ const verifyToken = async (token: string, type: TokenType) => {
   return tokenDoc;
 };
 
-interface AuthTokens {
+export interface AuthTokens {
   access: {
     token: string;
     expires: Date;

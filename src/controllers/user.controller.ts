@@ -12,8 +12,8 @@ const createUser = catchAsync(async (req: AuthRequest, res: Response) => {
 });
 
 const getUsers = catchAsync(async (req: PaginateQuery, res: Response) => {
-  const filter = pick(req.query, ['name', 'role']);
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const filter = pick(req.query, ['name', 'role']) as Record<string, unknown>;
+  const options = pick(req.query, ['sortBy', 'limit', 'page']) as Record<string, unknown>;
   const result = await userService.queryUsers(filter, options);
   res.send(result);
 });
@@ -44,4 +44,4 @@ const userController = {
   deleteUser,
 };
 
-module.exports = userController;
+export default userController;

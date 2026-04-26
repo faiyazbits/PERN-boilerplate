@@ -2,6 +2,7 @@ import type { Response } from 'express';
 import httpStatus from 'http-status';
 import { authService, emailService, tokenService, userService } from '../services';
 import type { AuthRequest } from '../types';
+import { ApiError } from '../utils/ApiError';
 import { catchAsync } from '../utils/catchAsync';
 
 const register = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -39,8 +40,11 @@ const resetPassword = catchAsync(async (req: AuthRequest, res: Response) => {
 });
 
 const sendVerificationEmail = catchAsync(async (req: AuthRequest, res: Response) => {
-  const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-  await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
+  if (!req.user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+  }
+  const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user as any);
+  await emailService.sendVerificationEmail((req.user as any).email, verifyEmailToken);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -60,4 +64,4 @@ const authController = {
   verifyEmail,
 };
 
-module.exports = authController;
+export default authController;

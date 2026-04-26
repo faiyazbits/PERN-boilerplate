@@ -1,11 +1,14 @@
 import type { HydratedDocument, Schema } from 'mongoose';
 
-const deleteAtPath = (obj: any, path: string[], index: number) => {
+const deleteAtPath = (obj: Record<string, unknown>, path: string[], index: number) => {
   if (index === path.length - 1) {
     delete obj[path[index]];
     return;
   }
-  deleteAtPath(obj[path[index]], path, index + 1);
+  const nextObj = obj[path[index]];
+  if (nextObj && typeof nextObj === 'object') {
+    deleteAtPath(nextObj as Record<string, unknown>, path, index + 1);
+  }
 };
 
 const toJSON = (schema: Schema) => {
@@ -15,14 +18,15 @@ const toJSON = (schema: Schema) => {
   }
 
   schema.options.toJSON = Object.assign(schema.options.toJSON || {}, {
-    transform(doc: HydratedDocument<any>, ret: any, options?: any) {
+    transform(doc: HydratedDocument<any>, ret: Record<string, unknown>, options?: any) {
       Object.keys(schema.paths).forEach((path) => {
-        if (schema.paths[path].options && (schema.paths[path].options as any).private) {
+        const pathOptions = schema.paths[path]?.options;
+        if (pathOptions && (pathOptions as any).private) {
           deleteAtPath(ret, path.split('.'), 0);
         }
       });
 
-      ret.id = ret._id.toString();
+      ret.id = (ret._id as any)?.toString();
       delete ret._id;
       delete ret.__v;
       delete ret.createdAt;

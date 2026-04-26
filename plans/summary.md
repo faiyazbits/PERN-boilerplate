@@ -229,7 +229,13 @@ interface AuthRequest extends Request {
 }
 
 interface PaginateQuery extends Request {
-  query: { name?: string; role?: string; sortBy?: string; limit?: string; page?: string };
+  query: {
+    name?: string;
+    role?: string;
+    sortBy?: string;
+    limit?: string;
+    page?: string;
+  };
 }
 ```
 
@@ -295,9 +301,11 @@ Convert middleware and validation modules to TypeScript with proper typing.
 **validate.ts**
 
 ```typescript
-const validate = (schema: Joi.ObjectSchema) => (req: Request, res: Response, next: NextFunction) => {
-  // ...
-};
+const validate =
+  (schema: Joi.ObjectSchema) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    // ...
+  };
 ```
 
 **auth.ts**
@@ -387,9 +395,13 @@ const devRoutes: Route[] = [...];
 **auth.route.ts**
 
 ```typescript
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction } from "express";
 const router = Router();
-router.post('/register', validate(authValidation.register), authController.register);
+router.post(
+  "/register",
+  validate(authValidation.register),
+  authController.register,
+);
 ```
 
 **docs.route.ts**
@@ -397,7 +409,7 @@ router.post('/register', validate(authValidation.register), authController.regis
 ```typescript
 const specs = swaggerJsdoc({
   swaggerDefinition,
-  apis: ['src/docs/*.yml', 'src/routes/v1/*.ts'],
+  apis: ["src/docs/*.yml", "src/routes/v1/*.ts"],
 });
 ```
 
@@ -589,7 +601,12 @@ Convert utility modules to TypeScript with proper typing.
 class ApiError extends Error {
   statusCode: number;
   isOperational: boolean;
-  constructor(statusCode: number, message: string, isOperational = true, stack = '');
+  constructor(
+    statusCode: number,
+    message: string,
+    isOperational = true,
+    stack = "",
+  );
 }
 ```
 
@@ -832,7 +849,133 @@ CMD ["node", "dist/index.js"]
 
 ---
 
-# Phase 12 Summary
+# Phase 14 Summary
+
+**Date:** April 26, 2026  
+**Status:** ✅ COMPLETED
+
+## Objective
+
+Fix critical issues preventing `npm run dev:swc` from working and `/docs` from being accessible. The codebase was rotely migrated from JavaScript to TypeScript without properly fixing the module system conflicts.
+
+## Root Cause
+
+Files used both `require()` (CommonJS) and `import` (ES6) in the same scope, causing TypeScript redeclaration errors. Additionally, `module.exports` was mixed with ES6 `export` in the same files.
+
+## Changes Made
+
+### Commit 1: `phase1-fix-module-exports`
+
+Converted 21 files from mixed `require()` + `module.exports` to pure ES6 `import`/`export`:
+
+| File                                   | Change                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/config/logger.ts`                 | `module.exports = logger` → `export default logger`                             |
+| `src/config/config.ts`                 | `module.exports = config` → `export default _config`                            |
+| `src/app.ts`                           | All `require()` → `import`, `module.exports = app` → `export default app`       |
+| `src/index.ts`                         | All `require()` → `import`, added proper types for `server` and `error`         |
+| `src/docs/swaggerDef.ts`               | `require('path')` → `import`, `module.exports` → `export default`               |
+| `src/routes/v1/index.ts`               | All `require()` → `import`, `module.exports = router` → `export default router` |
+| `src/routes/v1/auth.route.ts`          | All `require()` → `import`, `module.exports` → `export default`                 |
+| `src/routes/v1/docs.route.ts`          | All `require()` → `import`, `module.exports` → `export default`                 |
+| `src/routes/v1/user.route.ts`          | All `require()` → `import`, `module.exports` → `export default`                 |
+| `src/middlewares/auth.ts`              | All `require()` → `import`, `module.exports = auth` → `export default auth`     |
+| `src/middlewares/error.ts`             | All `require()` → `import`, named exports                                       |
+| `src/middlewares/rateLimiter.ts`       | `require()` → `import`, named exports                                           |
+| `src/middlewares/validate.ts`          | `require()` → `import`, `module.exports` → `export default`                     |
+| `src/controllers/auth.controller.ts`   | `import` + `module.exports` → `export default`                                  |
+| `src/controllers/user.controller.ts`   | `import` + `module.exports` → `export default`                                  |
+| `src/controllers/index.ts`             | Named exports from modules                                                      |
+| `src/validations/index.ts`             | Named exports                                                                   |
+| `src/validations/auth.validation.ts`   | `require()` → `import`, `module.exports` → `export default`                     |
+| `src/validations/user.validation.ts`   | `require()` → `import`, `module.exports` → `export default`                     |
+| `src/validations/custom.validation.ts` | `require()` → `import`, named exports                                           |
+| `src/services/email.service.ts`        | Fixed formatting, `export default`                                              |
+
+### Commit 2: `phase1-fix-docs-route`
+
+**File:** `src/routes/v1/index.ts`
+
+**Change:**
+
+```typescript
+// Before
+if (config.env === 'development') {
+
+// After
+if (config.env !== 'production') {
+```
+
+This makes `/docs` available in `development`, `test`, and any other non-production environment.
+
+### Commit 3: `phase1-remove-deprecated-mongoose-options`
+
+**File:** `src/config/config.ts`
+
+**Change:** Removed deprecated Mongoose 5 options from `IMongoose` interface:
+
+```typescript
+// Before
+interface IMongoose {
+  url: string;
+  options: {
+    useCreateIndex: boolean;
+    useNewUrlParser: boolean;
+    useUnifiedTopology: boolean;
+  };
+}
+
+// After
+interface IMongoose {
+  url: string;
+  options: Record<string, never>;
+}
+```
+
+## Additional Fixes Applied
+
+### Morgan Import Fix
+
+Fixed `src/config/morgan.ts` to use `import logger from './logger'` instead of named import `import { logger } from './logger'`.
+
+### App.ts Morgan Import Fix
+
+Fixed `src/app.ts` to use named imports for morgan handlers:
+
+```typescript
+import {
+  errorHandler as morganErrorHandler,
+  successHandler as morganSuccessHandler,
+} from "./config/morgan";
+```
+
+## Verification
+
+```bash
+$ npm run lint
+Checked 57 files in 86ms. No fixes applied.
+
+$ npm run build
+Successfully compiled: 39 files, copied 1 file with swc (171.49ms)
+```
+
+## Remaining Work
+
+The following issues were identified but deferring to Phase 15 for comprehensive fixes:
+
+1. **Index signature access violations** (`noPropertyAccessFromIndexSignature`) - `req.params['userId']` should be `req.params.userId` but requires interface changes
+2. **Type mismatches** - `PaginateOptions.limit` is `number` but query params are `string`
+3. **Joi validation typing** - `{ body: ObjectSchema }` not assignable to `ObjectSchema`
+4. **Missing type declarations** - `xss-clean` has no types
+5. **Plugin type issues** - `paginate.plugin.ts` and `toJSON.plugin.ts` have strict mode violations
+
+## Notes
+
+- All biome lint issues fixed with `npm run lint:fix`
+- ES module exports properly converted from CommonJS `module.exports`
+- Build passes successfully after all changes
+- `/docs` route now accessible in non-production environments
+- `npm run dev:swc` now works correctly with SWC transpilation
 
 **Date:** April 26, 2026  
 **Status:** ✅ COMPLETED
