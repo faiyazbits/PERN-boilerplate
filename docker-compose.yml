@@ -1,34 +1,69 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  node-app:
-    build: .
-    image: node-app
-    environment:
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/node_boilerplate
-    ports:
-      - '3000:3000'
-    depends_on:
-      - postgres
-    networks:
-      - node-network
-
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: haber
     ports:
       - '5432:5432'
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=node_boilerplate
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - node-network
+      - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: dev
+    image: haber-backend-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/haber
+      PORT: 3000
+    env_file:
+      - apps/backend/.env
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./apps/backend/src:/app/apps/backend/src
+      - ./packages/shared/src:/app/packages/shared/src
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: dev
+    image: haber-frontend-dev
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/frontend/src:/app/apps/frontend/src
+      - ./packages/shared/src:/app/packages/shared/src
+    networks:
+      - app-network
 
 volumes:
   pgdata:
 
 networks:
-  node-network:
+  app-network:
     driver: bridge

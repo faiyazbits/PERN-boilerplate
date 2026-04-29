@@ -1,20 +1,39 @@
-# Dependencies
-node_modules
-
-# yarn error logs
-yarn-error.log
-
-# Environment varibales
+# Env files
+apps/backend/.env
+apps/frontend/.env
 .env*
-!.env*.example
+!apps/backend/.env.example
+!apps/frontend/.env.example
 
-# Code coverage
-coverage
+# Build outputs
+apps/backend/dist/
+apps/frontend/dist/
+packages/shared/dist/
 
-# TypeScript
-dist/
+# Node modules
+node_modules/
+apps/*/node_modules/
+packages/*/node_modules/
+
+# TypeScript incremental build
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 
-# SWC
-.swc-cache
+# SWC cache
+.swc-cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+
+# Coverage
+coverage/
+
+# pnpm
+.pnpm-store/
+pnpm-lock.yaml

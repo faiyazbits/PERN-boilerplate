@@ -1,0 +1,45 @@
+{
+  "name": "@haber/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./schemas": {
+      "import": "./dist/esm/schemas/index.js",
+      "require": "./dist/cjs/schemas/index.js",
+      "types": "./dist/types/schemas/index.d.ts"
+    },
+    "./dtos": {
+      "import": "./dist/esm/dtos/index.js",
+      "require": "./dist/cjs/dtos/index.js",
+      "types": "./dist/types/dtos/index.d.ts"
+    },
+    "./constants": {
+      "import": "./dist/esm/constants/index.js",
+      "require": "./dist/cjs/constants/index.js",
+      "types": "./dist/types/constants/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build:esm": "tsc -p tsconfig.json --outDir dist/esm --module ESNext --moduleResolution bundler --resolveJsonModule false",
+    "build:cjs": "tsc -p tsconfig.json --outDir dist/cjs",
+    "build:types": "tsc -p tsconfig.json --outDir dist/types --emitDeclarationOnly",
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "dev": "tsc -p tsconfig.json --outDir dist/cjs --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,6 +1,26 @@
-version: '3'
+version: '3.9'
 
 services:
-  node-app:
-    container_name: node-app-prod
-    command: yarn start
+  postgres:
+    restart: always
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: runner
+    image: haber-backend-prod
+    environment:
+      NODE_ENV: production
+    volumes: []
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: runner
+    image: haber-frontend-prod
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro

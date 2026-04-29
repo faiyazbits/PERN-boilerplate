@@ -1,3 +1,14 @@
 node_modules
+apps/*/node_modules
+packages/*/node_modules
 .git
 .gitignore
+apps/backend/dist
+apps/frontend/dist
+packages/shared/dist
+apps/backend/.env
+apps/frontend/.env
+*.tsbuildinfo
+.swc-cache
+coverage
+pnpm-debug.log

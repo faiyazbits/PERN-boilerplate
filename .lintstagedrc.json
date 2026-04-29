@@ -1,4 +1,5 @@
 {
-  "*.ts": ["biome check --write"],
-  "*.js": ["biome check --write"]
+  "*.{ts,tsx}": ["biome check --write"],
+  "*.{js,jsx}": ["biome check --write"],
+  "*.json": ["biome format --write"]
 }
