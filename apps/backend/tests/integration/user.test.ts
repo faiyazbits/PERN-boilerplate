@@ -1,11 +1,11 @@
-const request = require('supertest');
-const faker = require('faker');
-const httpStatus = require('http-status');
-const app = require('../../src/app').default;
-const { setupTestDB } = require('../utils/setupTestDB');
-const { User } = require('../../src/models');
-const { userOne, userTwo, admin, insertUsers } = require('../fixtures/user.fixture');
-const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+import faker from 'faker';
+import httpStatus from 'http-status';
+import request from 'supertest';
+import app from '../../src/app';
+import { User } from '../../src/models';
+import { adminAccessToken, userOneAccessToken } from '../fixtures/token.fixture';
+import { admin, insertUsers, userOne, userTwo } from '../fixtures/user.fixture';
+import { setupTestDB } from '../utils/setupTestDB';
 
 setupTestDB();
 
@@ -553,7 +553,7 @@ describe('User routes', () => {
       const updateBody = { name: faker.name.findName() };
 
       await request(app)
-        .patch(`/v1/users/invalidId`)
+        .patch('/v1/users/invalidId')
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

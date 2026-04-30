@@ -17,4 +17,4 @@ const setupTestDB = () => {
   });
 };
 
-module.exports = { setupTestDB, prisma };
+export { prisma, setupTestDB };

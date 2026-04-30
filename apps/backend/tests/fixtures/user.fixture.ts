@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const faker = require('faker');
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import faker from 'faker';
 
 const prisma = new PrismaClient();
 
@@ -35,14 +35,11 @@ const admin = {
   isEmailVerified: false,
 };
 
-const insertUsers = async (users) => {
+const insertUsers = async (
+  users: Array<{ id: string; name: string; email: string; password: string; role: string; isEmailVerified: boolean }>
+) => {
   const data = users.map((user) => ({ ...user, password: hashedPassword }));
   await prisma.user.createMany({ data });
 };
 
-module.exports = {
-  userOne,
-  userTwo,
-  admin,
-  insertUsers,
-};
+export { admin, insertUsers, userOne, userTwo };

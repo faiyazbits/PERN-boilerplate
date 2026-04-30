@@ -1,20 +1,20 @@
-const request = require('supertest');
-const faker = require('faker');
-const httpStatus = require('http-status');
-const httpMocks = require('node-mocks-http');
-const moment = require('moment');
-const bcrypt = require('bcryptjs');
-const app = require('../../src/app').default;
-const config = require('../../src/config/config').default;
-const auth = require('../../src/middlewares/auth').default;
-const { tokenService, emailService } = require('../../src/services');
-const { ApiError } = require('../../src/utils/ApiError');
-const { setupTestDB } = require('../utils/setupTestDB');
-const { User, Token } = require('../../src/models');
-const { roleRights } = require('../../src/config/roles');
-const { tokenTypes } = require('../../src/config/tokens');
-const { userOne, admin, insertUsers } = require('../fixtures/user.fixture');
-const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+import bcrypt from 'bcryptjs';
+import faker from 'faker';
+import httpStatus from 'http-status';
+import moment from 'moment';
+import httpMocks from 'node-mocks-http';
+import request from 'supertest';
+import app from '../../src/app';
+import config from '../../src/config/config';
+import { roleRights } from '../../src/config/roles';
+import { tokenTypes } from '../../src/config/tokens';
+import auth from '../../src/middlewares/auth';
+import { Token, User } from '../../src/models';
+import { emailService, tokenService } from '../../src/services';
+import { ApiError } from '../../src/utils/ApiError';
+import { adminAccessToken, userOneAccessToken } from '../fixtures/token.fixture';
+import { admin, insertUsers, userOne } from '../fixtures/user.fixture';
+import { setupTestDB } from '../utils/setupTestDB';
 
 setupTestDB();
 
@@ -236,12 +236,12 @@ describe('Auth routes', () => {
 
   describe('POST /v1/auth/forgot-password', () => {
     beforeEach(() => {
-      jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
+      vi.spyOn(emailService.transport, 'sendMail').mockResolvedValue(undefined);
     });
 
     test('should return 204 and send reset password email to the user', async () => {
       await insertUsers([userOne]);
-      const sendResetPasswordEmailSpy = jest.spyOn(emailService, 'sendResetPasswordEmail');
+      const sendResetPasswordEmailSpy = vi.spyOn(emailService, 'sendResetPasswordEmail');
 
       await request(app).post('/v1/auth/forgot-password').send({ email: userOne.email }).expect(httpStatus.NO_CONTENT);
 
@@ -357,12 +357,12 @@ describe('Auth routes', () => {
 
   describe('POST /v1/auth/send-verification-email', () => {
     beforeEach(() => {
-      jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
+      vi.spyOn(emailService.transport, 'sendMail').mockResolvedValue(undefined);
     });
 
     test('should return 204 and send verification email to the user', async () => {
       await insertUsers([userOne]);
-      const sendVerificationEmailSpy = jest.spyOn(emailService, 'sendVerificationEmail');
+      const sendVerificationEmailSpy = vi.spyOn(emailService, 'sendVerificationEmail');
 
       await request(app)
         .post('/v1/auth/send-verification-email')
@@ -457,7 +457,7 @@ describe('Auth middleware', () => {
   test('should call next with no errors if access token is valid', async () => {
     await insertUsers([userOne]);
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -468,7 +468,7 @@ describe('Auth middleware', () => {
   test('should call next with unauthorized error if access token is not found in header', async () => {
     await insertUsers([userOne]);
     const req = httpMocks.createRequest();
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -481,7 +481,7 @@ describe('Auth middleware', () => {
   test('should call next with unauthorized error if access token is not a valid jwt token', async () => {
     await insertUsers([userOne]);
     const req = httpMocks.createRequest({ headers: { Authorization: 'Bearer randomToken' } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -496,7 +496,7 @@ describe('Auth middleware', () => {
     const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const refreshToken = tokenService.generateToken(userOne._id, expires, tokenTypes.REFRESH);
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${refreshToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -511,7 +511,7 @@ describe('Auth middleware', () => {
     const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const accessToken = tokenService.generateToken(userOne._id, expires, tokenTypes.ACCESS, 'invalidSecret');
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${accessToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -526,7 +526,7 @@ describe('Auth middleware', () => {
     const expires = moment().subtract(1, 'minutes');
     const accessToken = tokenService.generateToken(userOne._id, expires, tokenTypes.ACCESS);
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${accessToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -538,7 +538,7 @@ describe('Auth middleware', () => {
 
   test('should call next with unauthorized error if user is not found', async () => {
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth()(req, httpMocks.createResponse(), next);
 
@@ -551,7 +551,7 @@ describe('Auth middleware', () => {
   test('should call next with forbidden error if user does not have required rights and userId is not in params', async () => {
     await insertUsers([userOne]);
     const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth('anyRight')(req, httpMocks.createResponse(), next);
 
@@ -565,7 +565,7 @@ describe('Auth middleware', () => {
       headers: { Authorization: `Bearer ${userOneAccessToken}` },
       params: { userId: userOne._id.toHexString() },
     });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth('anyRight')(req, httpMocks.createResponse(), next);
 
@@ -578,7 +578,7 @@ describe('Auth middleware', () => {
       headers: { Authorization: `Bearer ${adminAccessToken}` },
       params: { userId: userOne._id.toHexString() },
     });
-    const next = jest.fn();
+    const next = vi.fn();
 
     await auth(...roleRights.get('admin'))(req, httpMocks.createResponse(), next);
 
