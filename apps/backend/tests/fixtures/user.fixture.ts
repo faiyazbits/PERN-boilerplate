@@ -1,6 +1,6 @@
+import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import faker from 'faker';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ const hashedPassword = bcrypt.hashSync(password, salt);
 
 const userOne = {
   id: crypto.randomUUID(),
-  name: faker.name.findName(),
+  name: faker.person.fullName(),
   email: faker.internet.email().toLowerCase(),
   password,
   role: 'user',
@@ -19,7 +19,7 @@ const userOne = {
 
 const userTwo = {
   id: crypto.randomUUID(),
-  name: faker.name.findName(),
+  name: faker.person.fullName(),
   email: faker.internet.email().toLowerCase(),
   password,
   role: 'user',
@@ -28,7 +28,7 @@ const userTwo = {
 
 const admin = {
   id: crypto.randomUUID(),
-  name: faker.name.findName(),
+  name: faker.person.fullName(),
   email: faker.internet.email().toLowerCase(),
   password,
   role: 'admin',

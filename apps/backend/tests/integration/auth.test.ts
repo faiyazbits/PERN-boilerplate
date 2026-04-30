@@ -1,5 +1,5 @@
+import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import faker from 'faker';
 import httpStatus from 'http-status';
 import moment from 'moment';
 import httpMocks from 'node-mocks-http';
@@ -23,7 +23,7 @@ describe('Auth routes', () => {
     let newUser;
     beforeEach(() => {
       newUser = {
-        name: faker.name.findName(),
+        name: faker.person.fullName(),
         email: faker.internet.email().toLowerCase(),
         password: 'password1',
       };

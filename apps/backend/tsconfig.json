@@ -8,8 +8,12 @@
     "declaration": false,
     "sourceMap": true,
     "incremental": true,
+    "types": ["node", "vitest/globals"],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@haber/shared": ["../../packages/shared/src/index.ts"],
+      "@haber/shared/*": ["../../packages/shared/src/*"]
     }
   },
   "include": ["src/**/*"],
