@@ -12,7 +12,7 @@ interface ErrorWithStatus extends Error {
 const errorConverter = (err: ErrorWithStatus, _req: Request, _res: Response, next: NextFunction) => {
   let error = err;
   if (!(error instanceof ApiError)) {
-    const statusCode = error.statusCode || httpStatus.BAD_REQUEST;
+    const statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
     const message = error.message || String(httpStatus[statusCode as keyof typeof httpStatus]);
     error = new ApiError(statusCode, message, false, err.stack);
   }
