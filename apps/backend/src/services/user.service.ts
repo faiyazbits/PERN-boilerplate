@@ -32,8 +32,6 @@ interface UserWithoutPassword {
   email: string;
   role: string;
   isEmailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const createUser = async (userBody: CreateUserBody): Promise<UserWithoutPassword> => {
@@ -55,8 +53,6 @@ const createUser = async (userBody: CreateUserBody): Promise<UserWithoutPassword
       email: true,
       role: true,
       isEmailVerified: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
   return user;
@@ -73,7 +69,7 @@ const queryUsers = async (filter: Record<string, unknown>, options: PaginateOpti
       orderBy.push({ [field]: order === 'desc' ? 'desc' : 'asc' });
     });
   } else {
-    orderBy.push({ createdAt: 'desc' });
+    orderBy.push({ createdAt: 'asc' });
   }
 
   const where: Record<string, unknown> = {};
@@ -92,8 +88,6 @@ const queryUsers = async (filter: Record<string, unknown>, options: PaginateOpti
         email: true,
         role: true,
         isEmailVerified: true,
-        createdAt: true,
-        updatedAt: true,
       },
     }),
     prisma.user.count({ where }),
@@ -101,7 +95,7 @@ const queryUsers = async (filter: Record<string, unknown>, options: PaginateOpti
 
   return {
     results,
-    page,
+    page: Number(page),
     limit: Number(limit),
     totalPages: Math.ceil(totalResults / Number(limit)),
     totalResults,
@@ -117,8 +111,6 @@ const getUserById = async (id: string): Promise<UserWithoutPassword | null> => {
       email: true,
       role: true,
       isEmailVerified: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
 };
@@ -151,8 +143,6 @@ const updateUserById = async (userId: string, updateBody: Partial<CreateUserBody
       email: true,
       role: true,
       isEmailVerified: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
   return updated;
@@ -171,8 +161,6 @@ const deleteUserById = async (userId: string): Promise<UserWithoutPassword> => {
       email: true,
       role: true,
       isEmailVerified: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
 };

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import config from '../../config/config';
 import authRoute from './auth.route';
 import docsRoute from './docs.route';
 import userRoute from './user.route';
@@ -20,9 +19,6 @@ const defaultRoutes: Route[] = [
     path: '/users',
     route: userRoute,
   },
-];
-
-const devRoutes: Route[] = [
   {
     path: '/docs',
     route: docsRoute,
@@ -32,12 +28,5 @@ const devRoutes: Route[] = [
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);
 });
-
-/* istanbul ignore next */
-if (config.env !== 'production') {
-  devRoutes.forEach((route) => {
-    router.use(route.path, route.route);
-  });
-}
 
 export default router;

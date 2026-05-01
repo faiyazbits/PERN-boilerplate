@@ -24,8 +24,6 @@ const jwtVerify = async (
         email: true,
         role: true,
         isEmailVerified: true,
-        createdAt: true,
-        updatedAt: true,
       },
     });
     if (!user) {

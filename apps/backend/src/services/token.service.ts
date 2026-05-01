@@ -21,10 +21,10 @@ const saveToken = async (token: string, userId: string, expires: Moment, type: T
   const tokenDoc = await prisma.token.create({
     data: {
       token,
-      userId,
       expires: expires.toDate(),
       type,
       blacklisted,
+      user: { connect: { id: userId } },
     },
   });
   return tokenDoc;
